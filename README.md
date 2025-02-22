@@ -1,8 +1,6 @@
 # AI-7
 
 # https://r00txnemesis.github.io/AI-7/
-How Far AI Change The World 
-
 
 **Object Detection Navigation Aid for Visually Impaired People**
 

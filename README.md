@@ -1,4 +1,6 @@
 # AI-7
+
+# https://r00txnemesis.github.io/AI-7/
 How Far AI Change The World 
 
 

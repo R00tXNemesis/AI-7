@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deteksi Benda dengan JS</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        video, canvas { width: 100%; max-width: 600px; }
+        #direction { font-size: 24px; font-weight: bold; color: white; background: green; padding: 10px; display: inline-block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas"></canvas>
+    <div id="direction">Menganalisis...</div>
+    
+    <script>
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const directionText = document.getElementById("direction");
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+            .then(stream => { video.srcObject = stream; })
+            .catch(err => console.error("Gagal mengakses kamera: ", err));
+
+        function detectObjects() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let data = imageData.data;
+            
+            let left = 0, center = 0, right = 0;
+            let widthThird = Math.floor(canvas.width / 3);
+            let height = canvas.height;
+
+            for (let y = 0; y < height; y += 5) {
+                for (let x = 0; x < canvas.width; x += 5) {
+                    let i = (y * canvas.width + x) * 4;
+                    let brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                    
+                    if (brightness < 100) { 
+                        if (x < widthThird) left++;
+                        else if (x < 2 * widthThird) center++;
+                        else right++;
+                    }
+                }
+            }
+
+            let minObstacle = Math.min(left, center, right);
+            if (minObstacle === center) {
+                directionText.innerText = "Lurus Aman";
+                directionText.style.background = "green";
+            } else if (minObstacle === left) {
+                directionText.innerText = "Belok Kanan";
+                directionText.style.background = "blue";
+            } else {
+                directionText.innerText = "Belok Kiri";
+                directionText.style.background = "red";
+            }
+            
+            requestAnimationFrame(detectObjects);
+        }
+        
+        video.addEventListener("loadeddata", detectObjects);
+    </script>
+</body>
+</html>
